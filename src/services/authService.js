@@ -6,7 +6,9 @@ import {
   onAuthStateChanged,
   GoogleAuthProvider,
   signInWithCredential,
-  OAuthProvider
+  OAuthProvider,
+  signInWithRedirect,
+  getRedirectResult
 } from 'firebase/auth';
 import { doc, setDoc, getDoc } from 'firebase/firestore';
 import * as WebBrowser from 'expo-web-browser';
@@ -85,13 +87,39 @@ export const getUserProfile = async (uid) => {
 export const signInWithGoogle = async () => {
   try {
     if (Platform.OS === 'web') {
-      // Web implementation
-      const { signInWithPopup } = await import('firebase/auth');
+      // Web implementation using redirect (more reliable for Expo web)
       const provider = new GoogleAuthProvider();
       provider.addScope('profile');
       provider.addScope('email');
       
-      const result = await signInWithPopup(auth, provider);
+      // Trigger the redirect
+      await signInWithRedirect(auth, provider);
+      // Note: The page will redirect, so this function won't return
+      // Result is handled by handleRedirectResult
+      return { success: true };
+    } else {
+      // Mobile implementation - requires additional setup
+      // For now, return error with instructions
+      return { 
+        success: false, 
+        error: 'Google Sign-In on mobile requires additional configuration. Please use email/password for now.' 
+      };
+    }
+  } catch (error) {
+    console.error('Google sign-in error:', error);
+    return { success: false, error: error.message };
+  }
+};
+
+/**
+ * Handle redirect result after Google sign-in
+ * Call this when the app loads to complete the sign-in process
+ */
+export const handleRedirectResult = async () => {
+  try {
+    const result = await getRedirectResult(auth);
+    
+    if (result) {
       const user = result.user;
       
       // Create or update user profile in Firestore
@@ -108,16 +136,11 @@ export const signInWithGoogle = async () => {
       }
       
       return { success: true, user };
-    } else {
-      // Mobile implementation - requires additional setup
-      // For now, return error with instructions
-      return { 
-        success: false, 
-        error: 'Google Sign-In on mobile requires additional configuration. Please use email/password for now.' 
-      };
     }
+    
+    return { success: false, error: 'No redirect result' };
   } catch (error) {
-    console.error('Google sign-in error:', error);
+    console.error('Redirect result error:', error);
     return { success: false, error: error.message };
   }
 };

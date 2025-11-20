@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { View, ActivityIndicator, StyleSheet } from 'react-native';
-import { observeAuthState } from './src/services/authService';
+import { observeAuthState, handleRedirectResult } from './src/services/authService';
 
 // Screens
 import LandingScreen from './src/screens/LandingScreen';
@@ -17,6 +17,11 @@ export default function App() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    // Handle Google redirect result on app load
+    handleRedirectResult().catch(err => {
+      console.log('No redirect result or error:', err);
+    });
+
     // Listen to authentication state changes
     const unsubscribe = observeAuthState((currentUser) => {
       setUser(currentUser);

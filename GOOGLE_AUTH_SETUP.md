@@ -17,13 +17,22 @@ This guide will walk you through setting up Google Authentication for your Psych
 
 The web configuration is already set up in the code and will work immediately after enabling Google Sign-In in Firebase.
 
+### How It Works
+
+The app uses Firebase's **redirect-based authentication** (`signInWithRedirect`) which:
+- Redirects the user to Google's sign-in page
+- Returns to your app after authentication
+- Automatically handles the sign-in process
+- Works reliably with Expo Web and avoids popup blockers
+
 ### Test on Web
 
 1. Run `npm run web`
 2. Navigate to the Login or Sign Up page
 3. Click "Continue with Google"
-4. Select your Google account
-5. You should be authenticated and redirected to the Interview screen
+4. You'll be redirected to Google's sign-in page
+5. Select your Google account
+6. You'll be redirected back and automatically signed in
 
 ## Step 3: Configure for iOS (Optional - Future)
 
