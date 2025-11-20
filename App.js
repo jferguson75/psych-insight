@@ -12,6 +12,19 @@ import InterviewScreen from './src/screens/InterviewScreen';
 
 const Stack = createNativeStackNavigator();
 
+// Configure URL paths for web
+const linking = {
+  prefixes: ['http://localhost:8081', 'https://yourdomain.com'],
+  config: {
+    screens: {
+      Landing: '',
+      Login: 'login',
+      SignUp: 'signup',
+      Interview: 'interview',
+    },
+  },
+};
+
 export default function App() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -40,24 +53,20 @@ export default function App() {
   }
 
   return (
-    <NavigationContainer>
+    <NavigationContainer linking={linking}>
       <Stack.Navigator
+        initialRouteName={user ? "Interview" : "Landing"}
         screenOptions={{
           headerShown: false,
           animation: 'fade',
         }}
       >
-        {user ? (
-          // Authenticated screens
-          <Stack.Screen name="Interview" component={InterviewScreen} />
-        ) : (
-          // Unauthenticated screens
-          <>
-            <Stack.Screen name="Landing" component={LandingScreen} />
-            <Stack.Screen name="Login" component={LoginScreen} />
-            <Stack.Screen name="SignUp" component={SignUpScreen} />
-          </>
-        )}
+        <Stack.Screen name="Landing" component={LandingScreen} />
+        <Stack.Screen name="Login" component={LoginScreen} />
+        <Stack.Screen name="SignUp" component={SignUpScreen} />
+        <Stack.Screen name="Interview">
+          {(props) => <InterviewScreen {...props} user={user} />}
+        </Stack.Screen>
       </Stack.Navigator>
     </NavigationContainer>
   );

@@ -41,7 +41,14 @@ const CORE_QUESTIONS = [
 
 const API_KEY = "AIzaSyBcgs-gUacFzu0O1bh-1CBjz1OITI_CnDU"; // Add your Gemini API key
 
-export default function InterviewScreen({ navigation }) {
+export default function InterviewScreen({ navigation, user }) {
+  // Redirect to login if not authenticated
+  useEffect(() => {
+    if (!user) {
+      navigation.replace('Login');
+    }
+  }, [user, navigation]);
+
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [currentQuestionText, setCurrentQuestionText] = useState(CORE_QUESTIONS[0]);
   const [userAnswer, setUserAnswer] = useState("");
