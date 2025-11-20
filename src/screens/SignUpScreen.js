@@ -13,7 +13,7 @@ import {
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { StatusBar } from 'expo-status-bar';
-import { signUp } from '../services/authService';
+import { signUp, signInWithGoogle } from '../services/authService';
 
 export default function SignUpScreen({ navigation }) {
   const [displayName, setDisplayName] = useState('');
@@ -21,6 +21,7 @@ export default function SignUpScreen({ navigation }) {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
 
   const handleSignUp = async () => {
     if (!email || !password || !confirmPassword) {
@@ -47,6 +48,18 @@ export default function SignUpScreen({ navigation }) {
       Alert.alert('Success', 'Account created successfully!');
     } else {
       Alert.alert('Sign Up Failed', result.error);
+    }
+  };
+
+  const handleGoogleSignIn = async () => {
+    setGoogleLoading(true);
+    const result = await signInWithGoogle();
+    setGoogleLoading(false);
+
+    if (result.success) {
+      // Navigation will be handled by auth state observer in App.js
+    } else {
+      Alert.alert('Google Sign-In Failed', result.error);
     }
   };
 
@@ -134,6 +147,27 @@ export default function SignUpScreen({ navigation }) {
                 <ActivityIndicator color="#0f172a" />
               ) : (
                 <Text style={styles.buttonText}>Create Account</Text>
+              )}
+            </TouchableOpacity>
+
+            <View style={styles.divider}>
+              <View style={styles.dividerLine} />
+              <Text style={styles.dividerText}>OR</Text>
+              <View style={styles.dividerLine} />
+            </View>
+
+            <TouchableOpacity
+              style={[styles.googleButton, googleLoading && styles.buttonDisabled]}
+              onPress={handleGoogleSignIn}
+              disabled={googleLoading}
+            >
+              {googleLoading ? (
+                <ActivityIndicator color="#0f172a" />
+              ) : (
+                <>
+                  <Text style={styles.googleIcon}>G</Text>
+                  <Text style={styles.googleButtonText}>Continue with Google</Text>
+                </>
               )}
             </TouchableOpacity>
 
@@ -236,6 +270,45 @@ const styles = StyleSheet.create({
   buttonText: {
     fontSize: 18,
     fontWeight: '700',
+    color: '#0f172a',
+  },
+  divider: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginVertical: 24,
+  },
+  dividerLine: {
+    flex: 1,
+    height: 1,
+    backgroundColor: 'rgba(139, 92, 246, 0.3)',
+  },
+  dividerText: {
+    color: '#64748b',
+    fontSize: 14,
+    paddingHorizontal: 16,
+  },
+  googleButton: {
+    backgroundColor: '#ffffff',
+    paddingVertical: 16,
+    borderRadius: 12,
+    alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'center',
+    shadowColor: '#ffffff',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 3,
+  },
+  googleIcon: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#4285F4',
+    marginRight: 12,
+  },
+  googleButtonText: {
+    fontSize: 16,
+    fontWeight: '600',
     color: '#0f172a',
   },
   footer: {
