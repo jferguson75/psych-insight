@@ -41,7 +41,7 @@ Or manually update `.firebaserc`:
 npx expo export --platform web
 ```
 
-This creates an optimized production build in the `dist` directory.
+This creates an optimised production build in the `dist` directory.
 
 ## Step 4: Deploy to Firebase Hosting
 

@@ -27,7 +27,7 @@ import {
  * CORE 10 QUESTIONS LIST
  */
 const CORE_QUESTIONS = [
-  "What is the one rule or belief you enforce most strictly on yourself, and if you broke it, what is the deepest fear about yourself that would be realized?",
+  "What is the one rule or belief you enforce most strictly on yourself, and if you broke it, what is the deepest fear about yourself that would be realised?",
   "What is the recurring, seemingly minor inconvenience in your life that actually serves a secret, unconscious purpose?",
   "What is a trait in another person that you consistently judge, and in what subtle way do you possess or secretly wish you possessed that same trait?",
   "If you received a substantial inheritance, what is the first thing you would stop doing?",
@@ -184,7 +184,7 @@ export default function InterviewScreen({ navigation, user }) {
         Next planned standard question: "${nextCoreQ}"
         
         TASK:
-        Analyze the user's answer. 
+        Analyse the user's answer. 
         1. If the answer was short, superficial, or unclear, return "NEXT_STANDARD".
         2. If the answer was deep, emotional, or revealed a contradiction, generate a specific, short, powerful follow-up question to dig deeper.
         

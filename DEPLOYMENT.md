@@ -263,7 +263,7 @@ As your app grows:
 2. Implement caching for API calls
 3. Add CDN for web assets
 4. Set up load balancing
-5. Monitor and optimize Firestore reads/writes
+5. Monitor and optimise Firestore reads/writes
 6. Consider dedicated backend for heavy operations
 
 ## Support & Maintenance
