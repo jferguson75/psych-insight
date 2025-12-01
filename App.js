@@ -87,12 +87,12 @@ export default function App() {
 
   // Force navigation to interview when user becomes authenticated
   useEffect(() => {
-    if (user && navigationRef.current && typeof window !== 'undefined') {
+    if (user && typeof window !== 'undefined') {
       // Check if we're on an auth page
       const currentPath = window.location.pathname;
       if (currentPath === '/login' || currentPath === '/signup' || currentPath === '/') {
-        // Use window.history to change URL without page reload
-        window.history.pushState({}, '', '/interview');
+        // Force navigation by replacing the URL
+        window.location.replace('/interview');
       }
     }
   }, [user]);
