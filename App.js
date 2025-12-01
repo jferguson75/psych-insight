@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { View, ActivityIndicator, StyleSheet } from 'react-native';
@@ -12,15 +12,54 @@ import InterviewScreen from './src/screens/InterviewScreen';
 
 const Stack = createNativeStackNavigator();
 
+// Separate stacks for auth vs app content
+function AuthStackScreens() {
+  return (
+    <Stack.Navigator
+      screenOptions={{ headerShown: false, animation: 'fade' }}
+    >
+      <Stack.Screen name="Landing" component={LandingScreen} />
+      <Stack.Screen name="Login" component={LoginScreen} />
+      <Stack.Screen name="SignUp" component={SignUpScreen} />
+    </Stack.Navigator>
+  );
+}
+
+function AppStackScreens({ user }) {
+  return (
+    <Stack.Navigator
+      screenOptions={{ headerShown: false, animation: 'fade' }}
+    >
+      <Stack.Screen name="Interview">
+        {(props) => <InterviewScreen {...props} user={user} />}
+      </Stack.Screen>
+    </Stack.Navigator>
+  );
+}
+
 // Configure URL paths for web
 const linking = {
-  prefixes: ['http://localhost:8081', 'https://yourdomain.com'],
+  prefixes: [
+    'http://localhost:8081',
+    'https://psych-insight.web.app',
+    'https://psych-insight.firebaseapp.com'
+  ],
   config: {
     screens: {
-      Landing: '',
-      Login: 'login',
-      SignUp: 'signup',
-      Interview: 'interview',
+      AuthStack: {
+        path: '',
+        screens: {
+          Landing: '',
+          Login: 'login',
+          SignUp: 'signup',
+        },
+      },
+      AppStack: {
+        path: '',
+        screens: {
+          Interview: 'interview',
+        },
+      },
     },
   },
 };
@@ -28,6 +67,7 @@ const linking = {
 export default function App() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const navigationRef = useRef();
 
   useEffect(() => {
     // Handle Google redirect result on app load
@@ -53,20 +93,15 @@ export default function App() {
   }
 
   return (
-    <NavigationContainer linking={linking}>
-      <Stack.Navigator
-        initialRouteName={user ? "Interview" : "Landing"}
-        screenOptions={{
-          headerShown: false,
-          animation: 'fade',
-        }}
-      >
-        <Stack.Screen name="Landing" component={LandingScreen} />
-        <Stack.Screen name="Login" component={LoginScreen} />
-        <Stack.Screen name="SignUp" component={SignUpScreen} />
-        <Stack.Screen name="Interview">
-          {(props) => <InterviewScreen {...props} user={user} />}
-        </Stack.Screen>
+    <NavigationContainer linking={linking} ref={navigationRef}>
+      <Stack.Navigator screenOptions={{ headerShown: false }}>
+        {user ? (
+          <Stack.Screen name="AppStack">
+            {(props) => <AppStackScreens {...props} user={user} />}
+          </Stack.Screen>
+        ) : (
+          <Stack.Screen name="AuthStack" component={AuthStackScreens} />
+        )}
       </Stack.Navigator>
     </NavigationContainer>
   );

@@ -30,7 +30,7 @@ Or manually update `.firebaserc`:
 ```json
 {
   "projects": {
-    "default": "your-firebase-project-id"
+    "default": "psych-insight"
   }
 }
 ```
@@ -49,7 +49,7 @@ This creates an optimized production build in the `dist` directory.
 firebase deploy --only hosting
 ```
 
-Your app will be deployed to: `https://your-project-id.web.app`
+Your app will be deployed to: `https://psych-insight.web.app`
 
 ## Quick Deploy Script
 
@@ -100,7 +100,7 @@ firebase hosting:channel:deploy preview-name
 2. **Firebase Config**: Your Firebase config should be added to `src/config/firebase.js`
 3. **Google Auth**: Update the authorized domains in Firebase Console:
    - Go to Authentication → Settings → Authorized domains
-   - Add your Firebase Hosting domain (e.g., `your-project-id.web.app`)
+   - Add your Firebase Hosting domain (e.g., `psych-insight.web.app`)
 
 ## Troubleshooting
 
@@ -144,7 +144,7 @@ jobs:
           repoToken: '${{ secrets.GITHUB_TOKEN }}'
           firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT }}'
           channelId: live
-          projectId: your-firebase-project-id
+          projectId: psych-insight
 ```
 
 ## Monitoring
