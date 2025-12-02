@@ -66,6 +66,15 @@ export default function InterviewScreen({ navigation, user }) {
   useEffect(() => {
     loadSession();
     // Don't auto-play - let user click Play button
+    
+    // Load voices for Web Speech API
+    if (Platform.OS === 'web' && typeof window !== 'undefined' && 'speechSynthesis' in window) {
+      // Chrome loads voices asynchronously
+      window.speechSynthesis.getVoices();
+      window.speechSynthesis.onvoiceschanged = () => {
+        window.speechSynthesis.getVoices();
+      };
+    }
   }, []);
 
   // Save session whenever state changes
@@ -111,8 +120,30 @@ export default function InterviewScreen({ navigation, user }) {
         window.speechSynthesis.cancel();
         
         const utterance = new SpeechSynthesisUtterance(text);
-        utterance.rate = 0.9;
-        utterance.pitch = 1.0;
+        
+        // Get available voices and select a female Australian or British voice
+        const voices = window.speechSynthesis.getVoices();
+        
+        // Prefer Australian English female voices, then British, then any English female voice
+        const femaleVoice = voices.find(voice => 
+          voice.lang.includes('en-AU') && voice.name.toLowerCase().includes('female')
+        ) || voices.find(voice => 
+          voice.lang.includes('en-AU') && voice.name.toLowerCase().includes('karen')
+        ) || voices.find(voice => 
+          voice.lang.includes('en-GB') && voice.name.toLowerCase().includes('female')
+        ) || voices.find(voice => 
+          voice.lang.includes('en') && voice.name.toLowerCase().includes('female')
+        ) || voices.find(voice => 
+          voice.lang.includes('en') && !voice.name.toLowerCase().includes('male')
+        );
+        
+        if (femaleVoice) {
+          utterance.voice = femaleVoice;
+        }
+        
+        utterance.lang = 'en-AU';
+        utterance.rate = 0.85; // Slightly slower for better clarity
+        utterance.pitch = 1.1; // Slightly higher for more natural female voice
         utterance.volume = 1.0;
         
         utterance.onstart = () => setIsSpeaking(true);
@@ -124,8 +155,9 @@ export default function InterviewScreen({ navigation, user }) {
     } else {
       // Mobile implementation
       Speech.speak(text, {
-        rate: 0.9,
-        pitch: 1.0,
+        language: 'en-AU',
+        rate: 0.85,
+        pitch: 1.1,
         onStart: () => setIsSpeaking(true),
         onDone: () => setIsSpeaking(false),
         onStopped: () => setIsSpeaking(false),
