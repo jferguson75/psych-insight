@@ -60,6 +60,7 @@ export default function InterviewScreen({ navigation, user }) {
   const [audioEnabled, setAudioEnabled] = useState(true);
   
   const scrollViewRef = useRef(null);
+  const recognitionRef = useRef(null);
 
   // Load saved session on mount
   useEffect(() => {
@@ -144,14 +145,117 @@ export default function InterviewScreen({ navigation, user }) {
     }
   };
 
-  const toggleListening = () => {
-    // Voice recognition is complex on mobile, showing alert for now
-    Alert.alert(
-      'Voice Input',
-      'Voice recognition requires additional setup on mobile. Please use text input for now.',
-      [{ text: 'OK' }]
-    );
+  const initializeSpeechRecognition = () => {
+    if (Platform.OS === 'web' && typeof window !== 'undefined') {
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      
+      if (SpeechRecognition) {
+        const recognition = new SpeechRecognition();
+        recognition.continuous = true;
+        recognition.interimResults = true;
+        recognition.lang = 'en-AU'; // Australian English
+        
+        recognition.onstart = () => {
+          setIsListening(true);
+        };
+        
+        recognition.onresult = (event) => {
+          let interimTranscript = '';
+          let finalTranscript = '';
+          
+          for (let i = event.resultIndex; i < event.results.length; i++) {
+            const transcript = event.results[i][0].transcript;
+            if (event.results[i].isFinal) {
+              finalTranscript += transcript + ' ';
+            } else {
+              interimTranscript += transcript;
+            }
+          }
+          
+          if (finalTranscript) {
+            setUserAnswer(prev => (prev + ' ' + finalTranscript).trim());
+          }
+        };
+        
+        recognition.onerror = (event) => {
+          console.error('Speech recognition error:', event.error);
+          setIsListening(false);
+          
+          if (event.error === 'not-allowed') {
+            Alert.alert(
+              'Microphone Permission',
+              'Please allow microphone access in your browser settings to use voice input.',
+              [{ text: 'OK' }]
+            );
+          } else if (event.error !== 'aborted') {
+            Alert.alert(
+              'Voice Input Error',
+              'There was an error with voice recognition. Please try again.',
+              [{ text: 'OK' }]
+            );
+          }
+        };
+        
+        recognition.onend = () => {
+          setIsListening(false);
+        };
+        
+        recognitionRef.current = recognition;
+        return recognition;
+      }
+    }
+    return null;
   };
+
+  const toggleListening = () => {
+    if (Platform.OS === 'web') {
+      if (!recognitionRef.current) {
+        const recognition = initializeSpeechRecognition();
+        if (!recognition) {
+          Alert.alert(
+            'Not Supported',
+            'Voice recognition is not supported in this browser. Please use Chrome, Edge, or Safari.',
+            [{ text: 'OK' }]
+          );
+          return;
+        }
+      }
+      
+      if (isListening) {
+        // Stop listening
+        recognitionRef.current?.stop();
+        setIsListening(false);
+      } else {
+        // Start listening
+        try {
+          recognitionRef.current?.start();
+        } catch (error) {
+          console.error('Error starting recognition:', error);
+          // If already running, stop and restart
+          recognitionRef.current?.stop();
+          setTimeout(() => {
+            recognitionRef.current?.start();
+          }, 100);
+        }
+      }
+    } else {
+      // Mobile fallback
+      Alert.alert(
+        'Voice Input',
+        'Voice recognition on mobile requires additional setup. Please use text input for now.',
+        [{ text: 'OK' }]
+      );
+    }
+  };
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (recognitionRef.current) {
+        recognitionRef.current.stop();
+      }
+    };
+  }, []);
 
   const callGeminiAPI = async (prompt) => {
     const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${API_KEY}`;
