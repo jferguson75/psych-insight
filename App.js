@@ -71,13 +71,17 @@ export default function App() {
 
   useEffect(() => {
     // Handle Google redirect result on app load
-    handleRedirectResult().catch(err => {
-      console.log('No redirect result or error:', err);
-    });
+    handleRedirectResult()
+      .then(result => {
+        console.log('handleRedirectResult completed:', result);
+      })
+      .catch(err => {
+        console.log('handleRedirectResult error:', err);
+      });
 
     // Listen to authentication state changes
     const unsubscribe = observeAuthState((currentUser) => {
-      console.log('Auth state changed:', currentUser ? 'User logged in' : 'No user');
+      console.log('Auth state changed:', currentUser ? `User logged in: ${currentUser.email}` : 'No user');
       setUser(currentUser);
       setLoading(false);
     });

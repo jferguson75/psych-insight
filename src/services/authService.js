@@ -149,14 +149,17 @@ export const signInWithGoogle = async () => {
  */
 export const handleRedirectResult = async () => {
   try {
+    console.log('Checking for redirect result...');
     const result = await getRedirectResult(auth);
     
     if (result) {
+      console.log('Redirect result found:', result.user.email);
       const user = result.user;
       
       // Create or update user profile in Firestore
       const userDoc = await getDoc(doc(db, 'users', user.uid));
       if (!userDoc.exists()) {
+        console.log('Creating new user profile in Firestore');
         await setDoc(doc(db, 'users', user.uid), {
           email: user.email,
           displayName: user.displayName || user.email.split('@')[0],
@@ -165,11 +168,14 @@ export const handleRedirectResult = async () => {
           subscriptionStatus: 'free',
           authProvider: 'google'
         });
+      } else {
+        console.log('User profile already exists');
       }
       
       return { success: true, user };
     }
     
+    console.log('No redirect result found');
     return { success: false, error: 'No redirect result' };
   } catch (error) {
     console.error('Redirect result error:', error);
