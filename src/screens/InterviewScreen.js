@@ -333,44 +333,56 @@ export default function InterviewScreen({ navigation, user }) {
     setConversationHistory(newHistory);
 
     try {
-      const nextCoreQ = CORE_QUESTIONS[(currentQuestionIndex + 1) % CORE_QUESTIONS.length];
+      // Check if we're on a core question or a follow-up
+      const isOnCoreQuestion = CORE_QUESTIONS.includes(currentQuestionText);
+      const nextCoreIndex = isOnCoreQuestion ? currentQuestionIndex + 1 : currentQuestionIndex;
+      const nextCoreQ = CORE_QUESTIONS[nextCoreIndex] || CORE_QUESTIONS[0];
       
       const systemPrompt = `
         You are an expert psychologist conducting a deep self-discovery interview.
         
         User's last answer: "${userAnswer}"
         Current Question was: "${currentQuestionText}"
-        Next planned standard question: "${nextCoreQ}"
+        Next planned core question: "${nextCoreQ}"
         
         TASK:
-        Analyse the user's answer. 
-        1. If the answer was short, superficial, or unclear, return "NEXT_STANDARD".
-        2. If the answer was deep, emotional, or revealed a contradiction, generate a specific, short, powerful follow-up question to dig deeper.
+        Analyse the user's answer deeply. 
+        1. If the answer reveals something deep, emotional, contradictory, or worth exploring further, generate ONE specific, short, powerful follow-up question to dig deeper into what they revealed.
+        2. If the answer was thorough and complete, or if you've already asked a follow-up, return exactly: NEXT_STANDARD
         
-        Output ONLY the question text or "NEXT_STANDARD".
+        Output ONLY the follow-up question text OR the exact phrase "NEXT_STANDARD" (nothing else).
       `;
 
       const aiResponse = await callGeminiAPI(systemPrompt);
+      console.log('AI Response:', aiResponse);
       
-      let nextQuestionToAsk = nextCoreQ;
-      let nextIndex = currentQuestionIndex + 1;
-
-      if (aiResponse && !aiResponse.includes("NEXT_STANDARD") && aiResponse.length > 10) {
-        nextQuestionToAsk = aiResponse.replace(/['"]+/g, '');
-        nextIndex = currentQuestionIndex;
+      if (aiResponse && aiResponse.trim() === "NEXT_STANDARD") {
+        // Move to next core question
+        setCurrentQuestionIndex(nextCoreIndex);
+        setCurrentQuestionText(nextCoreQ);
+        console.log('Moving to next core question:', nextCoreIndex, nextCoreQ);
+      } else if (aiResponse && aiResponse.length > 10) {
+        // AI generated a follow-up - stay on same core question index
+        const followUpQuestion = aiResponse.replace(/^["']|["']$/g, '').trim();
+        setCurrentQuestionText(followUpQuestion);
+        console.log('AI generated follow-up:', followUpQuestion);
+        // Don't increment currentQuestionIndex - we're still exploring this topic
       } else {
-        nextIndex = currentQuestionIndex + 1;
+        // Fallback: move to next core question
+        setCurrentQuestionIndex(nextCoreIndex);
+        setCurrentQuestionText(nextCoreQ);
+        console.log('Fallback to next core question');
       }
-
-      setCurrentQuestionIndex(nextIndex);
-      setCurrentQuestionText(nextQuestionToAsk);
+      
       setUserAnswer("");
       // Don't auto-play - let user click Play button
 
     } catch (error) {
       console.error("AI Error:", error);
-      const nextQ = CORE_QUESTIONS[(currentQuestionIndex + 1) % CORE_QUESTIONS.length];
-      setCurrentQuestionIndex(prev => prev + 1);
+      // On error, move to next core question
+      const nextIndex = currentQuestionIndex + 1;
+      const nextQ = CORE_QUESTIONS[nextIndex] || CORE_QUESTIONS[0];
+      setCurrentQuestionIndex(nextIndex);
       setCurrentQuestionText(nextQ);
       setUserAnswer("");
       // Don't auto-play - let user click Play button
