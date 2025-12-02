@@ -39,7 +39,7 @@ const CORE_QUESTIONS = [
   "Define 'enough' for your life. What evidence are you waiting for to tell you that you've reached it?"
 ];
 
-const API_KEY = "AIzaSyBcgs-gUacFzu0O1bh-1CBjz1OITI_CnDU"; // Add your Gemini API key
+const API_KEY = "AIzaSyBtv-cA6757NVpbjztpOB0czd3QL12c7jE"; // Replace with your valid Gemini API key from https://aistudio.google.com/apikey
 
 export default function InterviewScreen({ navigation, user }) {
   // Redirect to login if not authenticated
@@ -290,7 +290,7 @@ export default function InterviewScreen({ navigation, user }) {
   }, []);
 
   const callGeminiAPI = async (prompt) => {
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${API_KEY}`;
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}`;
     
     const payload = {
       contents: [{ parts: [{ text: prompt }] }]
