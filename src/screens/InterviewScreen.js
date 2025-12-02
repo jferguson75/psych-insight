@@ -276,8 +276,10 @@ export default function InterviewScreen({ navigation, user }) {
           ref={scrollViewRef}
           contentContainerStyle={styles.scrollContent}
         >
-          {/* Avatar */}
-          <View style={styles.avatarContainer}>
+          {/* Content Card Container */}
+          <View style={styles.contentCard}>
+            {/* Avatar */}
+            <View style={styles.avatarContainer}>
             <View style={[styles.avatarRing, isListening && styles.avatarRingActive]} />
             <View style={[styles.avatarRing2, isListening && styles.avatarRing2Active]} />
             <View style={[styles.avatar, isSpeaking && styles.avatarSpeaking]}>
@@ -343,18 +345,19 @@ export default function InterviewScreen({ navigation, user }) {
             </View>
           </View>
 
-          {/* Progress Indicator */}
-          <View style={styles.progressContainer}>
-            {CORE_QUESTIONS.map((_, idx) => (
-              <View 
-                key={idx} 
-                style={[
-                  styles.progressDot,
-                  idx < currentQuestionIndex && styles.progressDotCompleted,
-                  idx === currentQuestionIndex && styles.progressDotCurrent
-                ]}
-              />
-            ))}
+            {/* Progress Indicator */}
+            <View style={styles.progressContainer}>
+              {CORE_QUESTIONS.map((_, idx) => (
+                <View 
+                  key={idx} 
+                  style={[
+                    styles.progressDot,
+                    idx < currentQuestionIndex && styles.progressDotCompleted,
+                    idx === currentQuestionIndex && styles.progressDotCurrent
+                  ]}
+                />
+              ))}
+            </View>
           </View>
         </ScrollView>
       </LinearGradient>
@@ -377,6 +380,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingTop: 60,
     paddingBottom: 20,
+    maxWidth: 900,
+    width: '100%',
+    alignSelf: 'center',
   },
   headerLeft: {},
   headerRight: {
@@ -396,9 +402,25 @@ const styles = StyleSheet.create({
     fontSize: 20,
   },
   scrollContent: {
-    paddingHorizontal: 24,
-    paddingBottom: 40,
+    paddingHorizontal: Platform.OS === 'web' ? 20 : 24,
+    paddingVertical: 40,
     alignItems: 'center',
+    flexGrow: 1,
+  },
+  contentCard: {
+    width: '100%',
+    maxWidth: 900,
+    backgroundColor: 'rgba(15, 23, 42, 0.6)',
+    borderRadius: 24,
+    padding: Platform.OS === 'web' ? 48 : 32,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 20 },
+    shadowOpacity: 0.5,
+    shadowRadius: 40,
+    elevation: 10,
+    ...(Platform.OS === 'web' && {
+      backdropFilter: 'blur(10px)',
+    }),
   },
   avatarContainer: {
     position: 'relative',
@@ -466,11 +488,12 @@ const styles = StyleSheet.create({
   },
   inputCard: {
     width: '100%',
-    backgroundColor: 'rgba(30, 27, 75, 0.5)',
+    backgroundColor: 'rgba(30, 27, 75, 0.8)',
     borderRadius: 20,
-    padding: 16,
+    padding: 20,
     borderWidth: 1,
     borderColor: 'rgba(139, 92, 246, 0.3)',
+    marginBottom: 20,
   },
   textInput: {
     color: '#ffffff',
